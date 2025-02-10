@@ -1,14 +1,18 @@
-import pandas as pd
+import pathlib
 import re
 import string
-from sklearn.model_selection import train_test_split
+
+import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import train_test_split
+
+p = pathlib.Path(__file__).parent.resolve()
 
 # Load dataset (update the path if needed)
 df = pd.read_csv(
-    "c:/Users/matts/Desktop/Code-Shit/Python-Stuff/WWT-Stuff/Phishing-Detector/CEAS_08.csv",
+    p / "CEAS_08.csv",
     encoding="latin1",
 )
 

@@ -1,14 +1,16 @@
-# VENV name: cudaconfig
 import torch
 
-print("CUDA is available: ", torch.cuda.is_available())
+has_cuda = torch.cuda.is_available()
+print("CUDA is available: ", has_cuda)
 # True
 
-print("Number of CUDA devices: ", torch.cuda.device_count())
-# 5
 
-print("CUDA current device: ", torch.cuda.current_device())
-# 0
+cuda_devices = torch.cuda.device_count() if has_cuda else 0
+print("Number of CUDA devices: ", cuda_devices)
 
-print("CUDA device name: ", torch.cuda.get_device_name(0))
-# 'NVIDIA GeForce RTX 3060'
+if has_cuda:
+    print("CUDA current device: ", torch.cuda.current_device())
+    # 0
+
+    print("CUDA device name: ", torch.cuda.get_device_name(0))
+    # 'NVIDIA GeForce RTX 3060'
