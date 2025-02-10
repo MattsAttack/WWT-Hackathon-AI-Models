@@ -6,6 +6,7 @@ dependencies = [
     "httpx>=0.28.1",
     "pandas-stubs>=2.2.3.241126",
     "protobuf>=5.29.3",
+    "pydantic>=2.10.6",
     "rich>=13.9.4",
     "scikit-learn>=1.6.1",
     "scipy-stubs>=1.15.1.0",
@@ -28,7 +29,44 @@ dev = [
 ]
 
 [tool.ruff]
+preview = true
 target-version = "py313"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+ignore = [
+    "COM812",
+    "CPY001",
+    "D212",
+    "D400",
+    "D404",
+    "D415",
+    "D417",
+    "DOC",
+    "E203",
+    "E501",
+    "ISC001",
+    "S311",
+    "T201",
+    "TD003",
+]
+preview = true # enables pylint rules
+select = [
+    "ALL",
+    "D212",
+    "D404",
+    "D415",
+    "D417",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
 
 [tool.basedpyright]
 typeCheckingMode = "basic"

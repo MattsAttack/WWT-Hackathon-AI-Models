@@ -1,27 +1,26 @@
-from typing import TypedDict
-
-import httpx
-import rich
 from bs4 import BeautifulSoup
+import httpx
+from pydantic import BaseModel
+import rich
 from sentence_transformers import SentenceTransformer, util
 from torch.types import Number
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 
-class Source(TypedDict):
+class Source(BaseModel):
     title: str
     snippet: str
     link: str
 
 
-class Result(TypedDict):
+class Result(BaseModel):
     claim: str
     evidence: Source | None
     confidence: Number
 
 
 class AIFactChecker:
-    def __init__(self):
+    def __init__(self) -> None:
         """Load models"""
         self.claim_detection_model = pipeline("ner", model="dslim/bert-base-NER")
         self.evidence_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -61,13 +60,13 @@ class AIFactChecker:
         )
         async with httpx.AsyncClient() as client:
             response = (await client.get(query_url)).json()
-        return response.get("items", [])
+        return [Source.model_validate(source) for source in response.get("items", [])]
 
     def verify_claim(
         self, claim: str, evidence: list[Source]
     ) -> tuple[Source | None, Number]:
         """Compare claim with evidence using semantic similarity."""
-        evidence_texts = [e["snippet"] for e in evidence]
+        evidence_texts = [e.snippet for e in evidence]
         similarities: list[Number] = []
 
         for evidence_text in evidence_texts:
@@ -83,7 +82,7 @@ class AIFactChecker:
             return evidence[best_match_index], max(similarities)
         return None, 0
 
-    async def analyze(self, url) -> list[Result]:
+    async def analyze(self, url: str) -> list[Result]:
         """End-to-end analysis: Extract, detect claims, and fact-check."""
         content = await self.extract_content(url)
         claims = self.detect_claims(content)
@@ -107,9 +106,9 @@ async def main() -> None:
     results = await fact_checker.analyze(website_url)
 
     for result in results:
-        rich.print(f"Claim: {result['claim']}")
-        rich.print(f"Evidence: {result['evidence']}")
-        rich.print(f"Confidence: {result['confidence']:.2f}")
+        rich.print(f"Claim: {result.claim}")
+        rich.print(f"Evidence: {result.evidence}")
+        rich.print(f"Confidence: {result.confidence:.2f}")
         rich.print("-" * 50)
 
 
