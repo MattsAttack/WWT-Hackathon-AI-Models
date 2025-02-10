@@ -1,12 +1,28 @@
-import requests
+from typing import TypedDict
+
+import httpx
+import rich
 from bs4 import BeautifulSoup
-from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 from sentence_transformers import SentenceTransformer, util
+from torch.types import Number
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
+
+
+class Source(TypedDict):
+    title: str
+    snippet: str
+    link: str
+
+
+class Result(TypedDict):
+    claim: str
+    evidence: Source | None
+    confidence: Number
 
 
 class AIFactChecker:
     def __init__(self):
-        # Load models
+        """Load models"""
         self.claim_detection_model = pipeline("ner", model="dslim/bert-base-NER")
         self.evidence_model = SentenceTransformer("all-MiniLM-L6-v2")
         self.verification_model = AutoModelForSeq2SeqLM.from_pretrained(
@@ -16,46 +32,43 @@ class AIFactChecker:
             "google/t5-small-ssm-nq"
         )
 
-    def extract_content(self, url):
+    async def extract_content(self, url: str) -> str:
         """Scrape and clean website content."""
-        response = requests.get(url)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
 
         # Extract core content (e.g., article text)
         paragraphs = soup.find_all("p")
-        content = " ".join([p.get_text() for p in paragraphs])
-        return content
+        return " ".join([p.get_text() for p in paragraphs])
 
-    def detect_claims(self, content):
+    def detect_claims(self, content: str) -> list[str]:
         """Identify claims within the content."""
-        sentences = content.split(".")
-        claims = [
-            sentence.strip() for sentence in sentences if len(sentence.strip()) > 20
-        ]  # Basic length filter
-        return claims
+        return [
+            sentence.strip()
+            for sentence in content.split(".")
+            # Basic length filter
+            if len(sentence.strip()) > 20
+        ]
 
-    def retrieve_evidence(self, claim):
+    async def retrieve_evidence(
+        self,
+        claim: str,
+    ) -> list[Source]:
         """Search for evidence related to a claim."""
         query_url = (
             f"https://www.googleapis.com/customsearch/v1?q={claim}&key=API_KEY&cx=CX_ID"
         )
-        response = requests.get(query_url).json()
-        evidence_sources = []
+        async with httpx.AsyncClient() as client:
+            response = (await client.get(query_url)).json()
+        return response.get("items", [])
 
-        for item in response.get("items", []):
-            evidence_sources.append(
-                {
-                    "title": item["title"],
-                    "snippet": item["snippet"],
-                    "link": item["link"],
-                }
-            )
-        return evidence_sources
-
-    def verify_claim(self, claim, evidence):
+    def verify_claim(
+        self, claim: str, evidence: list[Source]
+    ) -> tuple[Source | None, Number]:
         """Compare claim with evidence using semantic similarity."""
         evidence_texts = [e["snippet"] for e in evidence]
-        similarities = []
+        similarities: list[Number] = []
 
         for evidence_text in evidence_texts:
             similarity = util.pytorch_cos_sim(
@@ -70,31 +83,37 @@ class AIFactChecker:
             return evidence[best_match_index], max(similarities)
         return None, 0
 
-    def analyze(self, url):
+    async def analyze(self, url) -> list[Result]:
         """End-to-end analysis: Extract, detect claims, and fact-check."""
-        content = self.extract_content(url)
+        content = await self.extract_content(url)
         claims = self.detect_claims(content)
-        results = []
+        results: list[Result] = []
 
         for claim in claims:
-            evidence = self.retrieve_evidence(claim)
+            evidence: list[Source] = await self.retrieve_evidence(claim)
             best_evidence, confidence = self.verify_claim(claim, evidence)
             results.append(
-                {"claim": claim, "evidence": best_evidence, "confidence": confidence}
+                Result(claim=claim, evidence=best_evidence, confidence=confidence)
             )
 
         return results
 
 
-if __name__ == "__main__":
-    print("this part is running")
+async def main() -> None:
+    rich.print("Beginning analysis...")
     fact_checker = AIFactChecker()
     website_url = "https://www.cnn.com/2025/02/09/business/trump-tariffs-steel-aluminum/index.html"
-    print(website_url)
-    results = fact_checker.analyze(website_url)
+    rich.print(website_url)
+    results = await fact_checker.analyze(website_url)
 
     for result in results:
-        print(f"Claim: {result['claim']}")
-        print(f"Evidence: {result['evidence']}")
-        print(f"Confidence: {result['confidence']:.2f}")
-        print("-" * 50)
+        rich.print(f"Claim: {result['claim']}")
+        rich.print(f"Evidence: {result['evidence']}")
+        rich.print(f"Confidence: {result['confidence']:.2f}")
+        rich.print("-" * 50)
+
+
+if __name__ == "__main__":
+    import trio
+
+    trio.run(main)
