@@ -19,16 +19,19 @@ class Result(BaseModel):
     confidence: Number
 
 
+_MIN_SENTENCE_LENGTH = 20
+
+
 class AIFactChecker:
     def __init__(self) -> None:
         """Load models"""
         self.claim_detection_model = pipeline("ner", model="dslim/bert-base-NER")
         self.evidence_model = SentenceTransformer("all-MiniLM-L6-v2")
         self.verification_model = AutoModelForSeq2SeqLM.from_pretrained(
-            "google/t5-small-ssm-nq"
+            "google/t5-small-ssm-nq",
         )
         self.verification_tokenizer = AutoTokenizer.from_pretrained(
-            "google/t5-small-ssm-nq"
+            "google/t5-small-ssm-nq",
         )
 
     async def extract_content(self, url: str) -> str:
@@ -47,7 +50,7 @@ class AIFactChecker:
             sentence.strip()
             for sentence in content.split(".")
             # Basic length filter
-            if len(sentence.strip()) > 20
+            if len(sentence.strip()) > _MIN_SENTENCE_LENGTH
         ]
 
     async def retrieve_evidence(
@@ -63,7 +66,9 @@ class AIFactChecker:
         return [Source.model_validate(source) for source in response.get("items", [])]
 
     def verify_claim(
-        self, claim: str, evidence: list[Source]
+        self,
+        claim: str,
+        evidence: list[Source],
     ) -> tuple[Source | None, Number]:
         """Compare claim with evidence using semantic similarity."""
         evidence_texts = [e.snippet for e in evidence]
@@ -92,7 +97,7 @@ class AIFactChecker:
             evidence: list[Source] = await self.retrieve_evidence(claim)
             best_evidence, confidence = self.verify_claim(claim, evidence)
             results.append(
-                Result(claim=claim, evidence=best_evidence, confidence=confidence)
+                Result(claim=claim, evidence=best_evidence, confidence=confidence),
             )
 
         return results

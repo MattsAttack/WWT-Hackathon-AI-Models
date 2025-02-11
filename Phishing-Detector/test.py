@@ -24,13 +24,12 @@ df = df[["text", "label"]]
 
 
 # Text Cleaning Function
-def clean_text(text):
-    text = str(text).lower()  # Convert to lowercase
+def clean_text(text: str) -> str:
+    text = (text).lower()  # Convert to lowercase
     text = re.sub(r"http\S+|www\S+", "", text)  # Remove URLs
-    text = text.translate(
-        str.maketrans("", "", string.punctuation)
+    return text.translate(
+        str.maketrans("", "", string.punctuation),
     )  # Remove punctuation
-    return text
 
 
 # Apply text cleaning
@@ -38,7 +37,10 @@ df["cleaned_text"] = df["text"].apply(clean_text)
 
 # Split dataset into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(
-    df["cleaned_text"], df["label"], test_size=0.2, random_state=42
+    df["cleaned_text"],
+    df["label"],
+    test_size=0.2,
+    random_state=42,
 )
 
 # Convert text to numerical features using TF-IDF
@@ -59,7 +61,7 @@ print("Classification Report:\n", classification_report(y_test, y_pred))
 
 
 # Function to classify a new email
-def predict_email(email_subject, email_body):
+def predict_email(email_subject, email_body) -> str:
     email_text = email_subject + " " + email_body
     cleaned_email = clean_text(email_text)
     email_tfidf = vectorizer.transform([cleaned_email])

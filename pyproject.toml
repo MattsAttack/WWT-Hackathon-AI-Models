@@ -39,6 +39,7 @@ docstring-code-format = true
 ignore = [
     "COM812",
     "CPY001",
+    "D",
     "D212",
     "D400",
     "D404",
@@ -48,6 +49,7 @@ ignore = [
     "E203",
     "E501",
     "ISC001",
+    "S101",
     "S311",
     "T201",
     "TD003",

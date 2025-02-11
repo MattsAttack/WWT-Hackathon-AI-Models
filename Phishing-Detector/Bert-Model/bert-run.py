@@ -28,14 +28,19 @@ def predict_email(
 
     # Tokenize the text
     inputs = tokenizer(
-        email_text, return_tensors="pt", truncation=True, padding=True, max_length=512
+        email_text,
+        return_tensors="pt",
+        truncation=True,
+        padding=True,
+        max_length=512,
     )
 
     # Make predictions
     with torch.no_grad():
         outputs = model(**inputs)
         prediction = torch.argmax(
-            outputs.logits, dim=1
+            outputs.logits,
+            dim=1,
         ).item()  # 0 = legitimate, 1 = phishing
 
     # Return result
