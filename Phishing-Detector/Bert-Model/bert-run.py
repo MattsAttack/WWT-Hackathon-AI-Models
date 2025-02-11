@@ -1,14 +1,15 @@
-import pathlib
+from pathlib import Path
 from typing import Literal
 
 import torch
 from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
 
-p = pathlib.Path(__file__).parent.resolve()
+p: Path = Path(__file__).parent.resolve()
+model_path = p / "trained_model"
 
 # Load the trained model and tokenizer
-model = DistilBertForSequenceClassification.from_pretrained(p / "trained_model")
-tokenizer = DistilBertTokenizer.from_pretrained(p / "trained_model")
+model = DistilBertForSequenceClassification.from_pretrained(model_path)
+tokenizer = DistilBertTokenizer.from_pretrained(model_path)
 
 
 def predict_email(
