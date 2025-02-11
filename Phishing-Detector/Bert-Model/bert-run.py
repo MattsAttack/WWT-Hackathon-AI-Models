@@ -4,7 +4,7 @@ from typing import Literal
 import torch
 from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
 
-p = pathlib.Path(__file__).parent.resolve().parent
+p = pathlib.Path(__file__).parent.resolve()
 
 # Load the trained model and tokenizer
 model = DistilBertForSequenceClassification.from_pretrained(p / "trained_model")
@@ -16,7 +16,6 @@ def predict_email(
     email_body: str,
 ) -> Literal["Phishing Email", "Legitimate Email"]:
     """Predict whether an email is phishing or legitimate using the trained BERT model.
-
 
     :param email_subject: Subject of the email.
     :param email_body: Body of the email.
