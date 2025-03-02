@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
+from pydantic import BaseModel
 import torch
 from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
 
@@ -12,10 +13,11 @@ model = DistilBertForSequenceClassification.from_pretrained(model_path)
 tokenizer = DistilBertTokenizer.from_pretrained(model_path)
 
 
-def predict_email(
-    email_subject: str,
-    email_body: str,
-) -> Literal["Phishing Email", "Legitimate Email"]:
+class Prediction(BaseModel):
+    result: Literal["Phishing Email", "Legitimate Email"]
+
+
+def predict_email(email_subject: str, email_body: str) -> Prediction:
     """Predict whether an email is phishing or legitimate using the trained BERT model.
 
     :param email_subject: Subject of the email.
@@ -44,16 +46,25 @@ def predict_email(
         ).item()  # 0 = legitimate, 1 = phishing
 
     # Return result
-    return "Phishing Email" if prediction == 1 else "Legitimate Email"
+    return Prediction(
+        result="Phishing Email" if prediction == 1 else "Legitimate Email"
+    )
 
 
-# Example email data
-# email_subject = "Update: New Polling Locations Announced"
-# email_body = "QUICK, you've fallen behind on your student loans. Click here to pay them at a discounted rate"
-email_subject = "Lunch"
-email_body = "Let's go get lunch, im hungry"
+if __name__ == "__main__":
+    # Example email data
+    email_1_subject = "Update: New Polling Locations Announced"
+    email_1_body = "QUICK, you've fallen behind on your student loans. Click here to pay them at a discounted rate"
 
-# Predict whether the email is phishing
-print("starting prediction")
-result = predict_email(email_subject, email_body)
-print(result)  # Output: "Phishing Email"
+    # Predict whether the email is phishing
+    print("starting prediction 1")
+    result_1 = predict_email(email_1_subject, email_1_body)
+    print(result_1.result)  # Output: "Phishing Email"
+
+    email_2_subject = "Lunch"
+    email_2_body = "Let's go get lunch, im hungry"
+
+    # Predict whether the email is phishing
+    print("starting prediction 2")
+    result_2 = predict_email(email_2_subject, email_2_body)
+    print(result_2.result)  # Output: "Legitimate Email"

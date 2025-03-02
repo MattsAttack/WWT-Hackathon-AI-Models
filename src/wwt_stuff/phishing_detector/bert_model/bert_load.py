@@ -22,21 +22,23 @@ from transformers import (
 from transformers.trainer import has_length
 
 if TYPE_CHECKING:
-    from rich.status import Status
+    import rich.status
 
 p = pathlib.Path(__file__).parent.resolve().parent
 
 # Load dataset
-df = pd.read_csv(
+email_dataset = pd.read_csv(
     p / "CEAS_08.csv",
     encoding="latin1",
 )
 
 # Combine subject and body
-df["text"] = f"{df['subject'].fillna('')} {df['body'].fillna('')}"
+email_dataset["text"] = (
+    f"{email_dataset['subject'].fillna('')} {email_dataset['body'].fillna('')}"
+)
 
 # Convert labels: 1 = Phishing, 0 = Legitimate
-df["label"] = df["label"].astype(int)
+email_dataset["label"] = email_dataset["label"].astype(int)
 
 # Split dataset into train/test
 train_texts: list[str]
@@ -44,8 +46,8 @@ test_texts: list[str]
 train_labels: list[int]
 test_labels: list[int]
 train_texts, test_texts, train_labels, test_labels = train_test_split(
-    df["text"].tolist(),
-    df["label"].tolist(),
+    email_dataset["text"].tolist(),
+    email_dataset["label"].tolist(),
     test_size=0.2,
     random_state=42,
 )
@@ -134,7 +136,7 @@ class RichProgressCallback(TrainerCallback):
         self.rich_group: Live | None = None
         self.rich_console: Console | None = None
 
-        self.training_status: Status | None = None
+        self.training_status: rich.status.Status | None = None
         self.current_step: int | None = None
 
     @override
