@@ -1,36 +1,169 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>WWT Stuff</title>
+    <title>DUCKY</title>
     <link rel="icon" href="/ducky.svg" type="image/svg+xml" />
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.sh/@google/generative-ai"
+        }
+      }
+    </script>
+
     <style>
-      :root {
-        background-color: oklch(0.984 0.003 247.858);
-        color: oklch(0.208 0.042 265.755);
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        /* background-color: #737373; */
+        background-image: url("bg.png");
+        margin: 0;
+      }
+      /* .BigContain {
+        display: inline-block;
+      }
+      .Ducky {
+        font-size: 30px;
+        font-family: "Times New Roman", Times, serif;
+        color: #f1f126;
+        margin-left: 30%;
+        background: #484b6a;
+        border-radius: 15px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0, 157, 255, 0.5);
+        display: flex;
+        flex-direction: column; */
+      /* } */
+      .chat-container {
+        text-align:center;
+        color:#f1f126;
+        font-size: 30px;
+        width: 1000px;
+        height: 600px;
+        margin-left: 30%;
+        background: #484b6a;
+        border-radius: 15px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0, 157, 255, 0.5);
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-box {
+        margin-top: 10px;
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        background: #000000;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 16px;
+      }
+      .input-container {
+        display: flex;
+        margin-top: 10px;
+      }
+      input {
+        flex: 1;
+        padding: 12px;
+        padding-right: 735px;
+        border: 2px solid #fff;
+        border-radius: 5px;
+        background: #000;
+        color: #fff;
+        font-size: 16px;
+      }
+      button {
+        background: #fff;
+        color: #000;
+        border: none;
+        padding: 12px;
+        margin-left: 8px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      button:hover {
+        background: #ccc;
+      }
+      .user-message {
+        text-align: right;
+      }
+      .user-message p1 {
+        display: inline-block;
+        color: #dde1de;
+        margin: 5px 0;
+        background-color: #1c1c1c;
+        border-radius: 15px;
+        padding: 10px;
+        font-size: 20px;
+      }
+      .bot-message {
+        text-align: left;
+      }
+      .bot-message p1 {
+        display: inline-block;
+        color: #f1f126;
+        margin: 5px 0;
+        background-color: #1c1c1c;
+        border-radius: 15px;
+        padding: 10px;
+        font-size: 20px;
         font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
           "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-      }
-
-      h1 {
-        color: oklch(0.623 0.214 259.815);
-      }
-
-      p > span.naughty {
-        color: oklch(0.41 0.159 10.272);
-        font-weight: 600;
-      }
-
-      p > span.nice {
-        color: oklch(0.696 0.17 162.48);
-        font-style: italic;
       }
     </style>
   </head>
   <body>
-    <h1>WWT Stuff</h1>
-    <p>
-      <span class="nice">Hi there!</span> Aren't you a
-      <span class="naughty">nosy</span> one, <span class="nice">friend?</span>
-    </p>
+    <!-- <div class="BigContain"> -->
+      <!-- <div class="Ducky">Ducky!</div> -->
+      <div class="chat-container">
+        ~~~~~~~~~~~~~~~~~~~~~~~~~ Ducky! ~~~~~~~~~~~~~~~~~~~~~~~~~
+        <br>
+        <div class="chat-box" id="chatBox"></div>
+        <div class="input-container">
+          <form onsubmit="return false">
+            <input type="text" id="userInput" placeholder="Type a message..." />
+            <button type="submit" onclick="globalThis.sendMessage()">
+              Send
+            </button>
+          </form>
+        </div>
+      <!-- </div> -->
+    <!-- </div> -->
+    <script type="module">
+      function Quack() {
+        let quack = new Audio("quack.mp3");
+        quack.play();
+      }
+      // @ts-check
+      async function sendMessage() {
+        let inputField = document.getElementById("userInput");
+        let message = inputField.value.trim();
+        if (message === "") return;
+
+        let chatBox = document.getElementById("chatBox");
+        let userMessage = `<div class='user-message'><br> <p1>${message}</p1></div><br>`;
+        chatBox.innerHTML += userMessage;
+
+        inputField.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        const responseContent = await fetch(
+          `/chat?request=${encodeURIComponent(message)}`
+        );
+
+        let botMessage = `<div class='bot-message'><strong>Ducky</strong><br> <p1>${await responseContent
+          .json()
+          .then((_) => _.response)}</p1></div><br>`;
+        Quack();
+        chatBox.innerHTML += botMessage;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+      globalThis.sendMessage = sendMessage;
+    </script>
   </body>
 </html>
