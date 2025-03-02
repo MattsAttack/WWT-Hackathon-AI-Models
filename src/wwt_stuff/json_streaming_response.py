@@ -9,7 +9,7 @@ from starlette.responses import JSONResponse, StreamingResponse
 
 
 class JSONStreamingResponse(StreamingResponse, JSONResponse):
-    """StreamingResponse, but it's JSON."""
+    """StreamingResponse, but it's JSON array."""
 
     def __init__(
         self,
@@ -25,10 +25,24 @@ class JSONStreamingResponse(StreamingResponse, JSONResponse):
             self._content_iterable = iterate_in_threadpool(content)
 
         async def body_iterator() -> AsyncIterable[bytes]:
+            yield b"["
+
+            first_item = True
+
             async for content_ in self._content_iterable:
                 if isinstance(content_, BaseModel):
                     content_ = content_.model_dump()  # noqa: PLW2901
+
+                # Add comma before all items except the first
+                if not first_item:
+                    yield b","
+                else:
+                    first_item = False
+
                 yield self.render(content_)
+
+            # End with closing bracket
+            yield b"]"
 
         self.body_iterator = body_iterator()
         self.status_code = status_code
