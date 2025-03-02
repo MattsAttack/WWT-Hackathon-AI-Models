@@ -9,6 +9,7 @@ dependencies = [
     "pandas-stubs>=2.2.3.241126",
     "protobuf>=5.29.3",
     "pydantic>=2.10.6",
+    "pytest>=8.3.4",
     "rich>=13.9.4",
     "scikit-learn>=1.6.1",
     "scipy-stubs>=1.15.1.0",
@@ -74,6 +75,11 @@ convention = "pep257"
 [tool.ruff.lint.isort]
 combine-as-imports = true
 force-sort-within-sections = true
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
 
 [tool.basedpyright]
 typeCheckingMode = "basic"
