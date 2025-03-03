@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["CEAS"]
+  "cSpell.words": ["CEAS"],
+  "python.analysis.typeCheckingMode": "standard"
 }
