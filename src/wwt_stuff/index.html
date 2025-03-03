@@ -11,38 +11,43 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
-        /* background-color: #737373; */
+        background-color: #4c9de9c6;
         background-image: url("bg.png");
-        background-repeat:no-repeat;
+        background-repeat: no-repeat;
         background-size: cover;
+        background-repeat: repeat-y;
         margin: 0;
       }
-      /* .BigContain {
+      .BigContain {
         display: inline-block;
+        margin-left: 30%;
+        height: 80%;
+        width: 55%;
       }
       .Ducky {
         font-size: 30px;
         font-family: "Times New Roman", Times, serif;
         color: #f1f126;
-        margin-left: 30%;
-        background: #484b6a;
-        border-radius: 15px;
-        padding: 15px;
-        box-shadow: 0 4px 15px rgba(0, 157, 255, 0.5);
-        display: flex;
-        flex-direction: column; */
-      /* } */
-      .chat-container {
-        text-align:center;
-        color:#f1f126;
-        font-size: 30px;
-        width: 50%;
-        height: 80%;
-        margin-left: 30%;
+        width: 90px;
+        margin-bottom: -25px;
         background: #555a8b;
         border-radius: 15px;
         padding: 15px;
-        box-shadow: 0 4px 15px rgba(0, 157, 255, 0.5);
+        /* box-shadow: 0 4px 15px rgba(0, 157, 255, 0.5); */
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-container {
+        text-align: center;
+        color: #f1f126;
+        font-size: 30px;
+        width: 100%;
+        /* margin-left: 30%; */
+        background: #555a8b;
+        border-radius: 15px;
+        padding: 15px;
+        height: 80%;
+        /* box-shadow: 0 4px 15px rgba(0, 157, 255, 0.5); */
         display: flex;
         flex-direction: column;
       }
@@ -109,7 +114,7 @@
         display: inline-block;
         color: #f1f126;
         margin: 5px 0;
-        background-color: #1c1c1c;
+        background-color: #2d3a52;
         border-radius: 15px;
         padding: 10px;
         font-size: 20px;
@@ -119,11 +124,12 @@
     </style>
   </head>
   <body>
-    <!-- <div class="BigContain"> -->
-      <!-- <div class="Ducky">Ducky!</div> -->
+    <div class="BigContain">
+      <div class="Ducky">Ducky!</div>
+
       <div class="chat-container">
-        Ducky!
-        <br>
+        <!-- <p class="Ducky">Ducky!</p>
+        <br /> -->
         <div class="chat-box" id="chatBox"></div>
         <div class="input-container">
           <form class="input-form" onsubmit="return false">
@@ -133,8 +139,8 @@
             </button>
           </form>
         </div>
-      <!-- </div> -->
-    <!-- </div> -->
+      </div>
+    </div>
     <script type="module">
       function Quack() {
         let quack = new Audio("quack.mp3");
